@@ -1,0 +1,101 @@
+.main {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+}
+
+.body {
+  display: flex;
+  flex: 1;
+  flex-direction: row;
+  width: 100vh;
+  height: 100vh;
+}
+
+.tableContainer {
+  flex: 1;
+  overflow: auto;
+  height: 100%;
+  margin-top: 10px;
+}
+
+.questionColumn {
+  width: 65%;
+}
+
+.tagColumn {
+  width: 25%;
+}
+
+.tableContainer table {
+  table-layout: fixed;
+  width: 100%;
+}
+
+.tableContainer::-webkit-scrollbar {
+  display: none;
+}
+
+.tableContainer table thead th {
+  position: sticky;
+  top: 0;
+
+}
+
+.searchField {
+  padding: 10px;
+}
+
+.questionContainer {
+  flex: 1;
+  padding: 10px;
+  height: 100%;
+  overflow-y: scroll;
+  scrollbar-width: none;
+}
+
+.questionContainer::-webkit-scrollbar {
+  display: none;
+}
+
+.topContainer {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  margin-bottom: 10px;
+  margin-top: 10px;
+  margin-right: 10px;
+  justify-content: space-between;
+}
+
+.truncate {
+  max-width: 350px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+}
+
+.truncate:hover {
+  color: #007bff;
+}
+
+.btnContainer {
+  display: flex;
+  gap: 10px;
+}
+
+.trueColor {
+  color: #95FB62
+
+}
+
+.falseColor {
+  color: #F06048;
+
+}
+
+.lastSeen {
+  color: #808080
+}

@@ -1,0 +1,48 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model Teste {
+  id    Int    @id @default(autoincrement())
+  teste String @unique
+}
+
+model Question {
+  id         String       @id @default(uuid())
+  question   String
+  choices    Choice[]
+  comments   String?
+  tag        String?
+  assets     String?
+  createdAt  DateTime     @default(now())
+  userChoice UserChoice[]
+}
+
+model Choice {
+  id          String       @id @default(uuid())
+  choice      String
+  isTrue      Boolean
+  belongsToId String
+  belongsTo   Question     @relation(fields: [belongsToId], references: [id], onDelete: Cascade)
+  userChoices UserChoice[]
+}
+
+model UserChoice {
+  id           String   @id @default(uuid())
+  createdAt    DateTime @default(now())
+  userChoiceId String
+  userChoice   Choice   @relation(fields: [userChoiceId], references: [id], onDelete: Cascade)
+  question     Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  questionId   String
+}
