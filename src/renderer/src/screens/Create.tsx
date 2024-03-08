@@ -60,6 +60,7 @@ export default function Create(): JSX.Element {
               onChange={(e) => setQuestion(e.target.value)}
               value={question}
               placeholder='Create question'
+              spellCheck="false"
             />
             <input type="file" />
           </details>
@@ -86,7 +87,8 @@ export default function Create(): JSX.Element {
                     placeholder={`Choice ${index + 1}`}
                     onChange={(e) => handleChoiceChange(index, e.target.value)}
                     value={choice.text}
-                  ></textarea>
+                    spellCheck="false"
+                  />
                 </div>
               ))}
             </div>

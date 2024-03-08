@@ -207,7 +207,8 @@ export default function Home(): JSX.Element {
                   onChange={(e) => setComments(e.target.value)}
                   value={comments}
                   rows="5"
-                ></textarea>
+                  spellCheck="false"
+                />
                 {commentSaved ? <p>Comment saved.</p> : null}
               </details>
             </div>
