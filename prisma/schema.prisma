@@ -6,11 +6,12 @@
 
 generator client {
   provider = "prisma-client-js"
+  engineType = "binary"
 }
 
 datasource db {
   provider = "sqlite"
-  url      = "file:./dev.db"
+  url      = "file:/var/lib/monkeymed/dev.db"
 }
 
 model Teste {
