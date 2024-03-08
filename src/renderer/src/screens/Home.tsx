@@ -31,6 +31,8 @@ export default function Home(): JSX.Element {
   const [searchTerm, setSearchTerm] = useState('')
   const [filteredQuestions, setFilteredQuestions] = useState<Question[]>([])
 
+  const [isEditing, setIsEditing] = useState()
+
   async function getData(): Promise<void> {
     const fetchedData = await window.electron.ipcRenderer.invoke('getData')
     setQuestions(fetchedData)
@@ -61,9 +63,9 @@ export default function Home(): JSX.Element {
     return response
   }
 
-  async function handleComments() {
-    const { id } = selectedQuestion
+  async function handleSave() {
     if (comments !== '') {
+      const { id } = selectedQuestion
       window.electron.ipcRenderer.invoke('saveComments', comments, id)
       setCommentSaved(true)
     }
@@ -76,9 +78,26 @@ export default function Home(): JSX.Element {
     setSelectQuestion()
   }
 
+  async function handleEditMode() {
+    setIsEditing(!isEditing)
+    console.log('Edit mode', isEditing)
+    if (selectedQuestion && isEditing === true) {
+      console.log('New tag is:', selectedQuestion?.tag)
+      console.log('Question edited for:', selectedQuestion?.question)
+      await window.electron.ipcRenderer.invoke('updateQuestion', selectedQuestion)
+    }
+  }
+
+  async function handleEdit(event, property) {
+    if (selectedQuestion) {
+      const editedQuestion = { ...selectedQuestion, [property]: event.target.value }
+      setSelectQuestion(editedQuestion)
+    }
+  }
+
   useEffect(() => {
     const results = questions.filter((question) =>
-      question.question.toLowerCase().includes(searchTerm.toLowerCase())
+      question.tag.toLowerCase().includes(searchTerm.toLowerCase())
     )
     setFilteredQuestions(results)
   }, [searchTerm, questions])
@@ -94,7 +113,7 @@ export default function Home(): JSX.Element {
             <div className={styles.searchField}>
               <input
                 type="search"
-                placeholder="Search questions"
+                placeholder="Search by tag"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -144,29 +163,49 @@ export default function Home(): JSX.Element {
           {/* RIGHT SCREEN */}
           <div className={styles.questionContainer}>
             <div className={styles.questionData}>
-              <div className={styles.topContainer}>
-                <span
-                  className={clsx({
-                    [styles.trueColor]: userChoiceIsTrue,
-                    [styles.falseColor]: !userChoiceIsTrue
-                  })}
-                >
-                  {showAnswer ? (userChoiceIsTrue ? 'True' : 'False') : null}
-                </span>
-                <span className={styles.lastSeen}>
-                  Last seen:{' '}
-                  {lastSeen
-                    ? new Date(lastSeen).toLocaleString('pt-BR', {
-                        year: 'numeric',
-                        month: '2-digit',
-                        day: '2-digit'
-                      })
-                    : 'never'}
-                </span>
-              </div>
+              {isEditing ? (
+                <div className={styles.tagEdit}>
+                  <input
+                    value={selectedQuestion ? selectedQuestion.tag : null}
+                    onChange={(e) => handleEdit(e, 'tag')}
+                  />
+                </div>
+              ) : (
+                <div className={styles.topContainer}>
+                  <span
+                    className={clsx({
+                      [styles.trueColor]: userChoiceIsTrue,
+                      [styles.falseColor]: !userChoiceIsTrue
+                    })}
+                  >
+                    {showAnswer ? (userChoiceIsTrue ? 'True' : 'False') : null}
+                  </span>
+
+                  <span className={styles.lastSeen}>
+                    Last seen:{' '}
+                    {lastSeen
+                      ? new Date(lastSeen).toLocaleString('pt-BR', {
+                          year: 'numeric',
+                          month: '2-digit',
+                          day: '2-digit'
+                        })
+                      : 'never'}
+                  </span>
+                </div>
+              )}
               <details>
                 <summary role="button">Question</summary>
-                <p>{selectedQuestion ? selectedQuestion.question : 'No question selected.'}</p>
+                {isEditing ? (
+                  <textarea
+                    name="edition"
+                    spellCheck="false"
+                    value={selectedQuestion ? selectedQuestion.question : 'No question selected.'}
+                    onChange={(e) => handleEdit(e, 'question')}
+                    rows="11"
+                  ></textarea>
+                ) : (
+                  <p>{selectedQuestion ? selectedQuestion.question : 'No question selected.'}</p>
+                )}
               </details>
               <details>
                 <summary role="button" className="outline contrast">
@@ -214,11 +253,18 @@ export default function Home(): JSX.Element {
             </div>
             <div className={styles.btnContainer}>
               <button onClick={handleAnswer}>Answer</button>
-              <button class="outline" onClick={handleComments}>
-                Save comments
+              <button class="outline" onClick={handleSave}>
+                Save
               </button>
               <button class="secondary" onClick={handleDelete}>
                 Delete
+              </button>
+              <button
+                onClick={handleEditMode}
+                className={clsx('secondary', { contrast: isEditing })}
+                onClick={handleEditMode}
+              >
+                Edit
               </button>
             </div>
           </div>

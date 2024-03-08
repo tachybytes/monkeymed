@@ -8,7 +8,8 @@ import {
   getLastSeen,
   getQuestions,
   saveChoice,
-  saveComments
+  saveComments,
+  updateQuestion
 } from './lib/db'
 
 function createWindow(): void {
@@ -90,6 +91,11 @@ app.whenReady().then(() => {
   ipcMain.handle('deleteQuestion', async (event, selectedQuestion) => {
     console.log('Delete command received')
     await deleteQuestion(selectedQuestion)
+  })
+
+  ipcMain.handle('updateQuestion', async (event, selectedQuestion) => {
+    console.log('Update question command received')
+    await updateQuestion(selectedQuestion)
   })
 
   createWindow()

@@ -86,3 +86,17 @@ export async function deleteQuestion(selectedQuestion) {
   })
   console.log('Question deleted:', selectedQuestion.id)
 }
+
+export async function updateQuestion(selectedQuestion) {
+  await prisma.question.update({
+    where: {
+      id: selectedQuestion.id
+    },
+    data: {
+      question: selectedQuestion.question,
+      tag: selectedQuestion.tag
+    }
+  })
+  console.log('Question updated:', selectedQuestion.question)
+  console.log('Tag updated:', selectedQuestion.tag)
+}
