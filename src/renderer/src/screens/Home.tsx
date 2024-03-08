@@ -79,7 +79,9 @@ export default function Home(): JSX.Element {
   }
 
   async function handleEditMode() {
-    setIsEditing(!isEditing)
+    if (selectedQuestion) {
+      setIsEditing(!isEditing)
+    }
     console.log('Edit mode', isEditing)
     if (selectedQuestion && isEditing === true) {
       console.log('New tag is:', selectedQuestion?.tag)
@@ -262,7 +264,6 @@ export default function Home(): JSX.Element {
               <button
                 onClick={handleEditMode}
                 className={clsx('secondary', { contrast: isEditing })}
-                onClick={handleEditMode}
               >
                 Edit
               </button>
