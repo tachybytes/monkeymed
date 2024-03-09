@@ -5,18 +5,13 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
+  provider   = "prisma-client-js"
   engineType = "binary"
 }
 
 datasource db {
   provider = "sqlite"
   url      = "file:/var/lib/monkeymed/dev.db"
-}
-
-model Teste {
-  id    Int    @id @default(autoincrement())
-  teste String @unique
 }
 
 model Question {
@@ -46,4 +41,5 @@ model UserChoice {
   userChoice   Choice   @relation(fields: [userChoiceId], references: [id], onDelete: Cascade)
   question     Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
   questionId   String
+  timeTaken    Int
 }

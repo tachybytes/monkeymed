@@ -21,11 +21,11 @@
 }
 
 .questionColumn {
-  width: 65%;
+  width: 60%;
 }
 
-.tagColumn {
-  width: 25%;
+.numberColumn {
+  width: 11%;
 }
 
 .tableContainer table {
@@ -67,6 +67,7 @@
   margin-top: 10px;
   margin-right: 10px;
   justify-content: space-between;
+
 }
 
 .truncate {
@@ -75,6 +76,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   cursor: pointer;
+  font-size: 0.7rem;
 }
 
 .truncate:hover {

@@ -33,10 +33,17 @@ export default function Home(): JSX.Element {
 
   const [isEditing, setIsEditing] = useState()
 
+  const [clock, setClock] = useState()
+  const [t0, setT0] = useState<number | null>(null)
+
+  const [delta, setDelta] = useState()
+
   async function getData(): Promise<void> {
     const fetchedData = await window.electron.ipcRenderer.invoke('getData')
     setQuestions(fetchedData)
     console.log(fetchedData)
+
+    console.log(filteredQuestions)
   }
 
   async function handleSelect(question): Promise<void> {
@@ -47,16 +54,22 @@ export default function Home(): JSX.Element {
     setSelectQuestion(question)
     const lastSeenDate = await window.electron.ipcRenderer.invoke('getLastSeen', question)
     setLastSeen(lastSeenDate)
+    // Start the timer
+    const startTime = Date.now()
+    setT0(startTime)
+    setClock(t0)
   }
 
   async function handleAnswer(): Promise<void> {
+    const delta = stopClock()
+    console.log('Time taken in seconds:', delta / 1000)
+    setDelta(delta)
     const response = await window.electron.ipcRenderer.invoke(
       'saveChoice',
       userChoiceId,
-      selectedQuestion
+      selectedQuestion,
+      delta,
     )
-    console.log('User choice is:', userChoiceIsTrue)
-    console.log('Selected question is:', selectedQuestion)
     setShowAnswer(true)
     setUserChoiceId(null)
     getData()
@@ -104,6 +117,12 @@ export default function Home(): JSX.Element {
     setFilteredQuestions(results)
   }, [searchTerm, questions])
 
+  function stopClock() {
+    const t1 = Date.now()
+    const delta = t1 - t0
+    return delta
+  }
+
   const ipcHandle = (): void => window.electron.ipcRenderer.send('ping')
 
   return (
@@ -125,39 +144,53 @@ export default function Home(): JSX.Element {
                 <button class="outline" onClick={handleCreate}>
                   Create
                 </button>
+                <button disabled class="outline">Benchmark</button>
               </div>
             </div>
-
             <hr></hr>
-
             <table>
-              <thead style={{ fontSize: '0.8rem' }}>
+              <thead style={{ fontSize: '0.7rem' }}>
                 <th scope="col" className={styles.questionColumn}>
                   Question
                 </th>
                 <th scope="col" className={styles.tagColumn}>
                   Tag
                 </th>
-                <th scope="col">#</th>
+                <th scope="col" className={styles.numberColumn}>
+                  #
+                </th>
+
+                <th scope="col" className={styles.numberColumn}>
+                  %
+                </th>
               </thead>
               <tbody>
-                {filteredQuestions.map((question) => (
-                  <tr
-                    key={question.id}
-                    style={{ fontSize: '0.8rem' }}
-                    onClick={() => handleSelect(question)}
-                  >
-                    <td className={styles.truncate}>{question.question}</td>
-                    <td>{question.tag}</td>
-                    <td>{question.userChoice.length}</td>
-                  </tr>
-                ))}
+                {filteredQuestions.map((question) => {
+                  const totalChoices = question.userChoice.length
+                  const trueChoices = question.userChoice.filter(
+                    (choice) => choice.userChoice.isTrue
+                  ).length
+                  const percentage = ((trueChoices / totalChoices) * 100).toFixed(0)
+                  return (
+                    <tr
+                      key={question.id}
+                      style={{ fontSize: '0.8rem' }}
+                      onClick={() => handleSelect(question)}
+                    >
+                      <td className={styles.truncate}>{question.question}</td>
+                      <td style={{ fontSize: '0.6rem' }}>{question.tag}</td>
+                      <td style={{ fontSize: '0.6rem' }}>{totalChoices}</td>
+                      <td style={{ fontSize: '0.6rem' }}>{trueChoices}</td>
+                    </tr>
+                  )
+                })}
               </tbody>
               <tfoot>
                 <tr>
                   <th scope="row">Total</th>
-                  <td></td>
                   <td>{filteredQuestions.length}</td>
+                  <td></td>
+                  <td></td>
                 </tr>
               </tfoot>
             </table>
@@ -184,14 +217,20 @@ export default function Home(): JSX.Element {
                   </span>
 
                   <span className={styles.lastSeen}>
-                    Last seen:{' '}
-                    {lastSeen
-                      ? new Date(lastSeen).toLocaleString('pt-BR', {
-                          year: 'numeric',
-                          month: '2-digit',
-                          day: '2-digit'
-                        })
-                      : 'never'}
+                    {showAnswer ? (
+                      <div>Time taken: {delta / 1000} seconds</div>
+                    ) : (
+                      <div>
+                        Last seen:{' '}
+                        {lastSeen
+                          ? new Date(lastSeen).toLocaleString('pt-BR', {
+                              year: 'numeric',
+                              month: '2-digit',
+                              day: '2-digit'
+                            })
+                          : 'never'}
+                      </div>
+                    )}
                   </span>
                 </div>
               )}

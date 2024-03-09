@@ -64,9 +64,9 @@ app.whenReady().then(() => {
   // Prisma Query
   ipcMain.handle('getData', () => getQuestions())
 
-  ipcMain.handle('saveChoice', async (event, userChoiceId, selectedQuestion) => {
+  ipcMain.handle('saveChoice', async (event, userChoiceId, selectedQuestion, delta) => {
     console.log('UserChoiceID is:', userChoiceId)
-    await saveChoice(userChoiceId, selectedQuestion)
+    await saveChoice(userChoiceId, selectedQuestion, delta)
     return { status: 200 }
   })
 

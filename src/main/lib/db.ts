@@ -6,20 +6,25 @@ export async function getQuestions() {
   const data = await prisma.question.findMany({
     include: {
       choices: true,
-      userChoice: true
+      userChoice: {
+        include: {
+          userChoice: true
+        }
+      }
     }
   })
   console.log(data)
   return data
 }
 
-export async function saveChoice(userChoiceId, selectedQuestion) {
+export async function saveChoice(userChoiceId, selectedQuestion, delta) {
   console.log(`Attempting to create UserChoiceID: ${userChoiceId}`)
   console.log('Selected question is:', selectedQuestion)
   await prisma.userChoice.create({
     data: {
       userChoiceId: userChoiceId,
-      questionId: selectedQuestion.id
+      questionId: selectedQuestion.id,
+      timeTaken: delta
     }
   })
   console.log('User choice saved!')
