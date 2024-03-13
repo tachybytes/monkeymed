@@ -19,7 +19,7 @@ model Question {
   question   String
   choices    Choice[]
   comments   String?
-  tag        String?
+  tags        Tag[]
   assets     String?
   createdAt  DateTime     @default(now())
   userChoice UserChoice[]
@@ -32,6 +32,13 @@ model Choice {
   belongsToId String
   belongsTo   Question     @relation(fields: [belongsToId], references: [id], onDelete: Cascade)
   userChoices UserChoice[]
+}
+
+model Tag {
+  id          String   @id @default(uuid())
+  tag         String
+  belongsToId String
+  belongsTo   Question @relation(fields: [belongsToId], references: [id], onDelete: Cascade)
 }
 
 model UserChoice {

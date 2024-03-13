@@ -6,6 +6,7 @@ export async function getQuestions() {
   const data = await prisma.question.findMany({
     include: {
       choices: true,
+      tags: true,
       userChoice: {
         include: {
           userChoice: true
@@ -59,11 +60,10 @@ export async function saveComments(comments, id) {
   console.log('Comment saved!')
 }
 
-export async function createQuestion(question, choices, tag) {
+export async function createQuestion(question, choices, tags) {
   const newQuestion = await prisma.question.create({
     data: {
-      question: question,
-      tag: tag
+      question: question
     }
   })
   console.log('New question is:', newQuestion)
@@ -75,6 +75,17 @@ export async function createQuestion(question, choices, tag) {
         data: {
           choice: choice.text,
           isTrue: choice.isTrue,
+          belongsToId: newQuestion.id
+        }
+      })
+    })
+  )
+
+  const newTags = await Promise.all(
+    tags.map(async (tag) => {
+      return await prisma.tag.create({
+        data: {
+          tag: tag,
           belongsToId: newQuestion.id
         }
       })
@@ -92,16 +103,34 @@ export async function deleteQuestion(selectedQuestion) {
   console.log('Question deleted:', selectedQuestion.id)
 }
 
-export async function updateQuestion(selectedQuestion) {
+export async function updateQuestion(selectedQuestion, tags) {
   await prisma.question.update({
     where: {
       id: selectedQuestion.id
     },
     data: {
-      question: selectedQuestion.question,
-      tag: selectedQuestion.tag
+      question: selectedQuestion.question
     }
   })
   console.log('Question updated:', selectedQuestion.question)
-  console.log('Tag updated:', selectedQuestion.tag)
+
+  // Step 1: Delete all current tags for the selected question
+  await prisma.tag.deleteMany({
+    where: {
+      belongsToId: selectedQuestion.id
+    }
+  })
+
+  // Step 2: Create new tags from the array
+  await Promise.all(
+    tags.map(async (tag) => {
+      return await prisma.tag.create({
+        data: {
+          tag: tag,
+          belongsToId: selectedQuestion.id
+        }
+      })
+    })
+  )
+  console.log("Tags updated:", selectedQuestion.tags)
 }

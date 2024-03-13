@@ -8,6 +8,7 @@ export default function Home(): JSX.Element {
     id: string
     question: string
     choices: { choice: string; isTrue: boolean }[]
+    tags: string[]
     comments: string
     tag: string
     assets: string
@@ -35,15 +36,14 @@ export default function Home(): JSX.Element {
 
   const [clock, setClock] = useState()
   const [t0, setT0] = useState<number | null>(null)
-
   const [delta, setDelta] = useState()
+
+  const [newTag, setNewTag] = useState('')
+  const [tags, setTags] = useState()
 
   async function getData(): Promise<void> {
     const fetchedData = await window.electron.ipcRenderer.invoke('getData')
     setQuestions(fetchedData)
-    console.log(fetchedData)
-
-    console.log(filteredQuestions)
   }
 
   async function handleSelect(question): Promise<void> {
@@ -58,6 +58,7 @@ export default function Home(): JSX.Element {
     const startTime = Date.now()
     setT0(startTime)
     setClock(t0)
+    console.log(selectedQuestion)
   }
 
   async function handleAnswer(): Promise<void> {
@@ -68,7 +69,7 @@ export default function Home(): JSX.Element {
       'saveChoice',
       userChoiceId,
       selectedQuestion,
-      delta,
+      delta
     )
     setShowAnswer(true)
     setUserChoiceId(null)
@@ -97,9 +98,8 @@ export default function Home(): JSX.Element {
     }
     console.log('Edit mode', isEditing)
     if (selectedQuestion && isEditing === true) {
-      console.log('New tag is:', selectedQuestion?.tag)
-      console.log('Question edited for:', selectedQuestion?.question)
-      await window.electron.ipcRenderer.invoke('updateQuestion', selectedQuestion)
+      console.log('New tags are', tags)
+      await window.electron.ipcRenderer.invoke('updateQuestion', selectedQuestion, tags)
     }
   }
 
@@ -111,8 +111,9 @@ export default function Home(): JSX.Element {
   }
 
   useEffect(() => {
+    {/* search by tag */}
     const results = questions.filter((question) =>
-      question.tag.toLowerCase().includes(searchTerm.toLowerCase())
+    question.tags.some((tag) => tag.tag.toLowerCase().includes(searchTerm.toLowerCase()))
     )
     setFilteredQuestions(results)
   }, [searchTerm, questions])
@@ -121,6 +122,25 @@ export default function Home(): JSX.Element {
     const t1 = Date.now()
     const delta = t1 - t0
     return delta
+  }
+
+  useEffect(() => {
+    if (selectedQuestion) {
+      setTags(selectedQuestion?.tags.map((tagObject) => tagObject.tag))
+    } else {
+      setTags([])
+    }
+  }, [selectedQuestion])
+
+  function addTag() {
+    setTags([...tags, newTag])
+    setNewTag('')
+    console.log('New tags are:', tags)
+  }
+
+  function removeTag(index: number) {
+    setTags(tags.filter((_, i) => i !== index))
+    console.log(tags)
   }
 
   const ipcHandle = (): void => window.electron.ipcRenderer.send('ping')
@@ -144,7 +164,9 @@ export default function Home(): JSX.Element {
                 <button class="outline" onClick={handleCreate}>
                   Create
                 </button>
-                <button disabled class="outline">Benchmark</button>
+                <button disabled class="outline">
+                  Benchmark
+                </button>
               </div>
             </div>
             <hr></hr>
@@ -171,6 +193,11 @@ export default function Home(): JSX.Element {
                     (choice) => choice.userChoice.isTrue
                   ).length
                   const percentage = ((trueChoices / totalChoices) * 100).toFixed(0)
+                  const tags = question.tags.map((tag, index) => (
+                    <span key={index} className={styles.tag}>
+                      {tag.tag}
+                    </span>
+                  ))
                   return (
                     <tr
                       key={question.id}
@@ -178,7 +205,8 @@ export default function Home(): JSX.Element {
                       onClick={() => handleSelect(question)}
                     >
                       <td className={styles.truncate}>{question.question}</td>
-                      <td style={{ fontSize: '0.6rem' }}>{question.tag}</td>
+                      <td>{tags}</td>
+
                       <td style={{ fontSize: '0.6rem' }}>{totalChoices}</td>
                       <td style={{ fontSize: '0.6rem' }}>{trueChoices}</td>
                     </tr>
@@ -199,11 +227,22 @@ export default function Home(): JSX.Element {
           <div className={styles.questionContainer}>
             <div className={styles.questionData}>
               {isEditing ? (
-                <div className={styles.tagEdit}>
-                  <input
-                    value={selectedQuestion ? selectedQuestion.tag : null}
-                    onChange={(e) => handleEdit(e, 'tag')}
-                  />
+                <div>
+                  <div>
+                    {tags?.map((tag, index) => (
+                      <span key={index} className={styles.tag} onClick={() => removeTag(index)}>
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                  <div className={styles.tagEdit}>
+                    <input
+                      placeholder="tag"
+                      value={newTag}
+                      onChange={(e) => setNewTag(e.target.value)}
+                    />
+                    <button onClick={addTag}>Add Tag</button>
+                  </div>
                 </div>
               ) : (
                 <div className={styles.topContainer}>

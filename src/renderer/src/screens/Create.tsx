@@ -7,9 +7,22 @@ export default function Create(): JSX.Element {
   const [choices, setChoices] = useState<{ text: string; isTrue: boolean }[]>([
     { text: '', isTrue: false }
   ])
-  const [tag, setTag] = useState<string>()
+
+  const [newTag, setNewTag] = useState<string>('')
+  const [tags, setTags] = useState<string[]>([])
 
   const navigate = useNavigate()
+
+  function addTag() {
+    if (newTag.trim() !== '') {
+      setTags([...tags, newTag.trim()])
+      setNewTag('') // Clear the input after adding the tag
+    }
+  }
+
+  function removeTag(index: number) {
+    setTags(tags.filter((_, i) => i !== index))
+  }
 
   function handleChoiceChange(index: number, value: string) {
     const updatedChoices = choices.map((choice, i) =>
@@ -38,12 +51,16 @@ export default function Create(): JSX.Element {
   }
 
   function handleSave() {
-    console.log(question)
-    console.log(choices)
-    console.log(tag)
-    window.electron.ipcRenderer.invoke('createQuestion', question, choices, tag)
-    setQuestion('')
-    setChoices([{ text: '', isTrue: false }])
+    if (question != '' && tags != '') {
+      console.log(question)
+      console.log(choices)
+      window.electron.ipcRenderer.invoke('createQuestion', question, choices, tags)
+      setQuestion('')
+      setChoices([{ text: '', isTrue: false }])
+    } else {
+      console.log('Empty field.')
+      console.log(choices)
+    }
   }
 
   return (
@@ -51,22 +68,39 @@ export default function Create(): JSX.Element {
       <div className={styles.main}>
         <div className={styles.body}>
           <div>
-            <input placeholder="Tag" onChange={(e) => setTag(e.target.value)} />
+            <div className={styles.addTagsRow}>
+              <input placeholder="Tag" value={newTag} onChange={(e) => setNewTag(e.target.value)} />
+              <button onClick={addTag} className={styles.addTagBtn}>
+                Add Tag
+              </button>
+              <div className={styles.newTags}>
+                {tags.map((tag, index) => (
+                  <div key={index}>
+                    <button class="outline" onClick={() => removeTag(index)}>
+                      {tag}
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
           <details>
             <summary role="button">Question</summary>
             <textarea
               name="question"
-              onChange={(e) => setQuestion(e.target.value)}
+              onChange={(e) => {
+                // Substitui todas as quebras de linha por espaços
+                const valueWithoutLineBreaks = e.target.value.replace(/\n/g, ' ')
+                setQuestion(valueWithoutLineBreaks)
+              }}
               value={question}
-              placeholder='Create question'
+              placeholder="Create question"
               spellCheck="false"
             />
             <input type="file" />
           </details>
-
           <details>
-            <summary role="button" className="outline contrast">
+            <summary role="button" class="secondary outline">
               Choices
             </summary>
             <div className={styles.choicesContainer}>
@@ -85,7 +119,11 @@ export default function Create(): JSX.Element {
                   <textarea
                     name="choice"
                     placeholder={`Choice ${index + 1}`}
-                    onChange={(e) => handleChoiceChange(index, e.target.value)}
+                    onChange={(e) => {
+                      // Substitui todas as quebras de linha por espaços
+                      const valueWithoutLineBreaks = e.target.value.replace(/\n/g, ' ')
+                      handleChoiceChange(index, valueWithoutLineBreaks)
+                    }}
                     value={choice.text}
                     spellCheck="false"
                   />
@@ -104,7 +142,7 @@ export default function Create(): JSX.Element {
           <button class="secondary" onClick={removeChoice}>
             Remove choice
           </button>
-          <button className="outline" onClick={handleClick}>
+          <button className="outline secondary" onClick={handleClick}>
             Home
           </button>
         </div>

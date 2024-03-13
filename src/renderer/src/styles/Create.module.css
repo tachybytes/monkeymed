@@ -18,3 +18,28 @@
   overflow-y: auto;
   max-height: 50vh;
 }
+
+.addTagsRow {
+  display: flex;
+  flex-direction: row;
+
+}
+
+.addTagsRow input {
+  width: 25%;
+  height: 8vh;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.addTagBtn {
+  height: 8vh;
+  border-top-left-radius: 0;
+  border-bottom-left-radius:  0;
+  margin-right: 10px;
+}
+
+.newTags {
+  display: flex;
+  gap: 10px;
+}

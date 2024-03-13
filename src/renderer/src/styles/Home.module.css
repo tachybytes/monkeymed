@@ -21,7 +21,7 @@
 }
 
 .questionColumn {
-  width: 60%;
+  width: 50%;
 }
 
 .numberColumn {
@@ -102,3 +102,37 @@
   color: #808080
 }
 
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  margin-left: 5px;
+  margin-top: 5px;
+  background-color: #e0e0e0;
+  color: #333;
+  cursor: default; /* Remove default pointer cursor if desired */
+}
+
+.tag:hover {
+  background-color: #C6C6C6;
+}
+
+.tagEdit {
+  display: flex;
+  margin-top: 10px;
+}
+
+.tagEdit input {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  height: 60px;
+}
+
+.tagEdit button {
+  height: 60px;
+  width: 150px;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+}

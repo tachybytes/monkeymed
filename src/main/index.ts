@@ -81,11 +81,11 @@ app.whenReady().then(() => {
     await saveComments(comments, id)
   })
 
-  ipcMain.handle('createQuestion', async (event, question, choices, tag) => {
+  ipcMain.handle('createQuestion', async (event, question, choices, tags) => {
     console.log('Question to be created:', question)
-    console.log('Tag is:', tag)
+
     console.log('Choices are:', choices)
-    await createQuestion(question, choices, tag)
+    await createQuestion(question, choices, tags)
   })
 
   ipcMain.handle('deleteQuestion', async (event, selectedQuestion) => {
@@ -93,9 +93,9 @@ app.whenReady().then(() => {
     await deleteQuestion(selectedQuestion)
   })
 
-  ipcMain.handle('updateQuestion', async (event, selectedQuestion) => {
+  ipcMain.handle('updateQuestion', async (event, selectedQuestion, tags) => {
     console.log('Update question command received')
-    await updateQuestion(selectedQuestion)
+    await updateQuestion(selectedQuestion, tags)
   })
 
   createWindow()
